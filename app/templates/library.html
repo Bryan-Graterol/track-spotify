@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Biblioteca · Spotify Track{% endblock %}
+
+{% block content %}
+
+{% if scope_error %}
+  <div class="card empty-state">
+    <i class="bi bi-shield-lock"></i>
+    <h4 class="mb-2">Falta permiso</h4>
+    <p class="mb-3">
+      Tu conexión actual no incluye acceso a artistas seguidos ni playlists.
+      Reconecta tu cuenta para autorizar estos nuevos permisos.
+    </p>
+    <a href="{{ url_for('main.login') }}" class="btn btn-accent">
+      <i class="bi bi-spotify"></i> Reconectar cuenta
+    </a>
+  </div>
+{% else %}
+
+  <h5 class="panel-title mb-3"><i class="bi bi-person-heart text-pink"></i> Artistas que sigues ({{ artists|length }})</h5>
+  {% if artists %}
+    <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3 mb-4">
+      {% set tones = ['tone-pink', 'tone-purple', 'tone-cyan', 'tone-yellow'] %}
+      {% for artist in artists %}
+        <div class="col">
+          <a href="{{ artist.url }}" target="_blank" rel="noopener"
+             class="text-decoration-none text-reset">
+            <div class="card h-100 p-3 text-center {{ tones[loop.index0 % 4] }}">
+              {% if artist.image %}
+                <img src="{{ artist.image }}" alt=""
+                     class="rounded-circle mx-auto mb-2 border border-2 border-dark"
+                     style="width: 72px; height: 72px; object-fit: cover;">
+              {% else %}
+                <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center border border-2 border-dark"
+                     style="width: 72px; height: 72px; background-color: var(--paper);">
+                  <i class="bi bi-person-fill fs-3"></i>
+                </div>
+              {% endif %}
+              <div class="track-name text-truncate">{{ artist.name }}</div>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card p-3 mb-4">
+      <p class="text-muted small mb-0 py-3 text-center">No sigues ningún artista todavía.</p>
+    </div>
+  {% endif %}
+
+  <h5 class="panel-title mb-3"><i class="bi bi-music-note-list text-purple"></i> Tus playlists ({{ playlists|length }})</h5>
+  {% if playlists %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+      {% set ptones = ['tone-cyan', 'tone-yellow', 'tone-pink', 'tone-purple'] %}
+      {% for playlist in playlists %}
+        <div class="col">
+          <a href="{{ playlist.url }}" target="_blank" rel="noopener"
+             class="text-decoration-none text-reset">
+            <div class="card h-100 p-3 d-flex flex-row align-items-center gap-3 {{ ptones[loop.index0 % 4] }}">
+              {% if playlist.image %}
+                <img src="{{ playlist.image }}" alt=""
+                     class="rounded-3 border border-2 border-dark flex-shrink-0"
+                     style="width: 64px; height: 64px; object-fit: cover;">
+              {% else %}
+                <div class="rounded-3 border border-2 border-dark d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width: 64px; height: 64px; background-color: var(--paper);">
+                  <i class="bi bi-music-note-beamed fs-4"></i>
+                </div>
+              {% endif %}
+              <div class="overflow-hidden">
+                <div class="track-name text-truncate">{{ playlist.name }}</div>
+                {% if playlist.owner %}
+                  <div class="track-meta text-truncate">{{ playlist.owner }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card p-3">
+      <p class="text-muted small mb-0 py-3 text-center">No tienes playlists todavía.</p>
+    </div>
+  {% endif %}
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Top · Spotify Track{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+  <ul class="nav nav-pills gap-2">
+    {% for k, label in [('tracks', 'Canciones'), ('artists', 'Artistas'), ('albums', 'Álbumes')] %}
+      <li class="nav-item">
+        <a class="nav-link {% if kind == k %}active btn-accent{% else %}bg-white{% endif %}"
+           href="{{ url_for('main.top', type=k, range=range_key, limit=limit) }}">{{ label }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <div class="d-flex flex-wrap gap-2">
+    {% for r, label in range_labels.items() %}
+      <a href="{{ url_for('main.top', type=kind, range=r, limit=limit) }}"
+         class="badge badge-range text-decoration-none {% if range_key == r %}is-active{% else %}is-inactive{% endif %} px-3 py-2">
+        {{ label }}
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+  <span class="track-meta">Mostrar:</span>
+  {% for n in limit_options %}
+    <a href="{{ url_for('main.top', type=kind, range=range_key, limit=n) }}"
+       class="badge badge-range text-decoration-none {% if limit == n %}is-active{% else %}is-inactive{% endif %} px-3 py-2">
+      Top {{ n }}
+    </a>
+  {% endfor %}
+</div>
+
+<div class="card p-3">
+  {% if rows %}
+    {% set tones = ['tone-pink', 'tone-purple', 'tone-cyan', 'tone-yellow'] %}
+    {% for row in rows %}
+      <div class="list-row d-flex align-items-center gap-3">
+        <span class="rank-badge {% if loop.index <= 3 %}{{ tones[loop.index0 % 4] }}{% endif %}">{{ loop.index }}</span>
+
+        {% if kind == 'tracks' %}
+          {% set track, artist, play_count, total_ms = row %}
+          <div class="flex-grow-1 overflow-hidden">
+            <div class="track-name text-truncate">{{ track.name }}</div>
+            <div class="track-meta text-truncate">{{ artist.name }}{% if track.album %} · {{ track.album }}{% endif %}</div>
+          </div>
+        {% elif kind == 'artists' %}
+          {% set artist, play_count, total_ms = row %}
+          <div class="flex-grow-1 overflow-hidden">
+            <div class="track-name text-truncate">{{ artist.name }}</div>
+          </div>
+        {% else %}
+          {% set album, artist, play_count, total_ms = row %}
+          <div class="flex-grow-1 overflow-hidden">
+            <div class="track-name text-truncate">{{ album }}</div>
+            <div class="track-meta text-truncate">{{ artist.name }}</div>
+          </div>
+        {% endif %}
+
+        <div class="text-end">
+          <div class="track-name">{{ play_count }}x</div>
+          <div class="track-meta">{{ "{:,.1f}".format(total_ms / 1000 / 60 / 60) }} h</div>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-muted small mb-0 py-3 text-center">No hay reproducciones en este periodo todavía.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

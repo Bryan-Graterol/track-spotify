@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Datos crudos · Spotify Track{% endblock %}
+
+{% block content %}
+
+<h5 class="panel-title mb-3"><i class="bi bi-code-slash"></i> Respuestas crudas de la API</h5>
+
+{% if logs %}
+  <div class="accordion" id="rawAccordion">
+    {% for log in logs %}
+      <div class="card mb-3">
+        <button class="btn w-100 d-flex justify-content-between align-items-center text-start p-3"
+                type="button" data-bs-toggle="collapse" data-bs-target="#log{{ log.id }}">
+          <span class="track-name">
+            Sync #{{ log.id }} · {{ log.synced_at.strftime('%d %b %Y, %H:%M:%S') }}
+          </span>
+          <span class="track-meta">
+            {{ log.items_fetched }} obtenidas · {{ log.plays_inserted }} nuevas
+          </span>
+        </button>
+        <div id="log{{ log.id }}" class="collapse">
+          <div class="p-3 pt-0">
+            <pre class="bg-dark text-light rounded-3 p-3 mb-0" style="max-height: 500px; overflow: auto; font-size: 0.8rem;">{{ log.pretty_json }}</pre>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card p-3">
+    <p class="text-muted small mb-0 py-3 text-center">Todavía no hay syncs registrados.</p>
+  </div>
+{% endif %}
+
+{% endblock %}

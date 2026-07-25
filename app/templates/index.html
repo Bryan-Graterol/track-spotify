@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Spotify Track{% endblock %}
+
+{% block content %}
+
+{% if not spotify_connected %}
+  <div class="card empty-state">
+    <i class="bi bi-spotify"></i>
+    <h4 class="mb-2">Conecta tu cuenta de Spotify</h4>
+    <p class="mb-3">
+      Presiona "Conectar con Spotify" en la barra superior para autorizar el acceso
+      a tu historial de reproducciones recientes.
+    </p>
+    <a href="{{ url_for('main.login') }}" class="btn btn-accent">
+      <i class="bi bi-spotify"></i> Conectar con Spotify
+    </a>
+  </div>
+{% elif not has_data %}
+  <div class="card empty-state">
+    <i class="bi bi-vinyl"></i>
+    <h4 class="mb-2">Aún no hay reproducciones</h4>
+    <p class="mb-3">
+      Tu cuenta está conectada. Presiona "Sincronizar" en la barra superior para traer
+      tus reproducciones más recientes de Spotify.
+    </p>
+  </div>
+{% else %}
+
+  <div class="bento-grid">
+    <div class="bento-tile bento-hero">
+      <div class="stat-icon"><i class="bi bi-headphones"></i></div>
+      <div>
+        <div class="stat-label">Horas escuchadas</div>
+        <div class="stat-value">{{ "{:,.1f}".format(stats.total_hours) }}</div>
+      </div>
+    </div>
+
+    <div class="bento-tile tone-pink">
+      <div class="stat-icon"><i class="bi bi-play-fill"></i></div>
+      <div>
+        <div class="stat-label">Reproducciones</div>
+        <div class="stat-value">{{ "{:,}".format(stats.total_plays) }}</div>
+      </div>
+    </div>
+
+    <div class="bento-tile tone-cyan">
+      <div class="stat-icon"><i class="bi bi-music-note-beamed"></i></div>
+      <div>
+        <div class="stat-label">Canciones únicas</div>
+        <div class="stat-value">{{ "{:,}".format(stats.unique_tracks) }}</div>
+      </div>
+    </div>
+
+    <div class="bento-tile tone-yellow">
+      <div class="stat-icon"><i class="bi bi-mic-fill"></i></div>
+      <div>
+        <div class="stat-label">Artistas únicos</div>
+        <div class="stat-value">{{ "{:,}".format(stats.unique_artists) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-lg-6">
+      <div class="card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="panel-title mb-0"><i class="bi bi-trophy-fill text-pink"></i> Top canciones · 30 días</h6>
+          <a href="{{ url_for('main.top', type='tracks', range='30d') }}" class="text-decoration-none small fw-semibold">Ver todo</a>
+        </div>
+        {% if top_tracks %}
+          {% set tones = ['tone-pink', 'tone-purple', 'tone-cyan', 'tone-yellow', 'tone-pink'] %}
+          {% for track, artist, play_count, total_ms in top_tracks %}
+            <div class="list-row d-flex align-items-center gap-3">
+              <span class="rank-badge {{ tones[loop.index0 % 5] }}">{{ loop.index }}</span>
+              <div class="flex-grow-1 overflow-hidden">
+                <div class="track-name text-truncate">{{ track.name }}</div>
+                <div class="track-meta text-truncate">{{ artist.name }}</div>
+              </div>
+              <div class="track-meta">{{ play_count }}x</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted small mb-0">Sin reproducciones en este periodo.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="panel-title mb-0"><i class="bi bi-star-fill text-purple"></i> Top artistas · 30 días</h6>
+          <a href="{{ url_for('main.top', type='artists', range='30d') }}" class="text-decoration-none small fw-semibold">Ver todo</a>
+        </div>
+        {% if top_artists %}
+          {% set tones = ['tone-purple', 'tone-yellow', 'tone-pink', 'tone-cyan', 'tone-purple'] %}
+          {% for artist, play_count, total_ms in top_artists %}
+            <div class="list-row d-flex align-items-center gap-3">
+              <span class="rank-badge {{ tones[loop.index0 % 5] }}">{{ loop.index }}</span>
+              <div class="flex-grow-1 overflow-hidden">
+                <div class="track-name text-truncate">{{ artist.name }}</div>
+              </div>
+              <div class="track-meta">{{ play_count }}x</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted small mb-0">Sin reproducciones en este periodo.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="panel-title mb-0"><i class="bi bi-clock-history"></i> Escuchado recientemente</h6>
+      <a href="{{ url_for('main.history') }}" class="text-decoration-none small fw-semibold">Ver historial</a>
+    </div>
+    {% for play, track, artist in recent %}
+      <div class="list-row d-flex align-items-center gap-3">
+        <i class="bi bi-music-note-beamed text-muted"></i>
+        <div class="flex-grow-1 overflow-hidden">
+          <div class="track-name text-truncate">{{ track.name }}</div>
+          <div class="track-meta text-truncate">{{ artist.name }}</div>
+        </div>
+        <div class="track-meta">{{ play.played_at.strftime('%d %b, %H:%M') }}</div>
+      </div>
+    {% endfor %}
+  </div>
+
+{% endif %}
+{% endblock %}
